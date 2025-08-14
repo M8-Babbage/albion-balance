@@ -32,12 +32,6 @@ client.commands = new Collection();
   loadCommands(client);
 
   try {
-    await connectToMongo(process.env.MONGODB_URL);
-  } catch (error) {
-    console.error("Error al conectar a la base de datos.", error);
-  }
-
-  try {
     await client.login(process.env.BOT_TOKEN);
     console.log("Bot iniciado correctamente ✅");
 
@@ -47,5 +41,11 @@ client.commands = new Collection();
     });
   } catch (error) {
     console.error("Error al iniciar sesión del bot", error);
+  }
+
+  try {
+    await connectToMongo(process.env.MONGODB_URL);
+  } catch (error) {
+    console.error("Error al conectar a la base de datos.", error);
   }
 })();
