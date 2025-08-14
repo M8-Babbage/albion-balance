@@ -5,8 +5,16 @@ const {
   loadCommands,
 } = require("./src/utils/loadHandlers.js");
 const connectToMongo = require("./mongo.js");
-
 const { Client, GatewayIntentBits, Collection } = require("discord.js");
+const express = require("express");
+
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("Bot en ejecución 🚀");
+});
+
+const PORT = process.env.PORT || 3000;
 
 const client = new Client({
   intents: [
@@ -31,7 +39,13 @@ client.commands = new Collection();
 
   try {
     await client.login(process.env.BOT_TOKEN);
+    console.log("Bot iniciado correctamente ✅");
+
+    // Solo iniciar el servidor web después de que el bot esté listo
+    app.listen(PORT, () => {
+      console.log(`Servidor web escuchando en puerto ${PORT}`);
+    });
   } catch (error) {
-    console.error("Error al iniciar sesion del bot", error);
+    console.error("Error al iniciar sesión del bot", error);
   }
 })();
