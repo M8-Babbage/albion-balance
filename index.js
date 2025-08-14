@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const { Client, GatewayIntentBits, Collection } = require("discord.js");
-
 const {
   loadFunctions,
   loadEvents,
@@ -9,56 +8,45 @@ const {
 } = require("./src/utils/loadHandlers.js");
 const connectToMongo = require("./mongo.js");
 
-// Crear cliente de Discord
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-  ],
+const app = express();
+
+// Web server para Render y UptimeRobot
+app.get("/", (req, res) => {
+  res.send("Bot is alive!");
 });
-client.commands = new Collection();
+
+// Levantar servidor primero
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Web server listening on port ${process.env.PORT || 3000}`);
+  startBot(); // Iniciar el bot después que el server esté listo
+});
 
 async function startBot() {
-  console.log("🚀 Iniciando bot...");
+  const client = new Client({
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+    ],
+  });
 
-  // 1. Conectar a MongoDB
+  client.commands = new Collection();
+
+  loadFunctions(client);
+  loadEvents(client);
+  loadCommands(client);
+
   try {
     await connectToMongo(process.env.MONGODB_URL);
-    console.log("✅ [MongoDB] Conectado exitosamente.");
+    console.log("Conectado a MongoDB");
   } catch (error) {
-    console.error("❌ [MongoDB] Error al conectar:", error);
-    process.exit(1);
+    console.error("Error al conectar a la base de datos.", error);
   }
 
-  // 2. Cargar handlers
-  try {
-    await loadFunctions(client);
-    await loadEvents(client);
-    await loadCommands(client);
-    console.log("✅ [Handlers] Cargados correctamente.");
-  } catch (error) {
-    console.error("❌ [Handlers] Error al cargar:", error);
-    process.exit(1);
-  }
-
-  // 3. Iniciar sesión en Discord
   try {
     await client.login(process.env.BOT_TOKEN);
-    console.log("✅ [Discord] Bot logueado correctamente.");
+    console.log("Bot iniciado en Discord");
   } catch (error) {
-    console.error("❌ [Discord] Error al iniciar sesión:", error);
-    process.exit(1);
+    console.error("Error al iniciar sesión del bot", error);
   }
-
-  // 4. Iniciar servidor Express para Render
-  const app = express();
-  app.get("/", (req, res) => res.send("Bot is running"));
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`🌐 Servidor Express escuchando en puerto ${PORT}`);
-  });
 }
-
-// Arrancar bot
-startBot();
