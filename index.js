@@ -7,6 +7,20 @@ const connectToMongo = require("./mongo.js");
 
 const { Client, GatewayIntentBits, Collection } = require("discord.js");
 
+// --- Truco para Render: abrir un servidor web ---
+const express = require("express");
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get("/", (req, res) => {
+  res.send("✅ Bot de Discord corriendo correctamente.");
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor HTTP escuchando en puerto ${PORT}`);
+});
+// -------------------------------------------------
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
